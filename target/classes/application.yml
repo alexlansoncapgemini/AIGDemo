@@ -1,0 +1,17 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /mydemo
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/aigdemo
+    username: root
+    password: admin
+  jpa:
+    generate-ddl: true
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2
