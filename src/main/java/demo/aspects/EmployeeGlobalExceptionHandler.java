@@ -2,21 +2,19 @@ package demo.aspects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import demo.exceptions.EmployeeDuplicateEntryExistsException;
 import demo.exceptions.EmployeeInvalidPasswordException;
 import demo.exceptions.EmployeeInvalidRequestParameterException;
 import demo.exceptions.EmployeeNotFoundException;
 import demo.exceptions.EmployeeRequestOnNullObjectException;
-import demo.exceptions.EmployeeServerErrorException;
 import demo.responses.EmployeeResponseBodySuperclass;
-import demo.util.EmployeeMessageManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class EmployeeGlobalExceptionHandler {
 	
 	//thrown when trying to add an employee that already exists in the database
@@ -71,23 +69,5 @@ public class EmployeeGlobalExceptionHandler {
 		response.setStatusDescription(ex.getMessage());			//WWW-Authenticate header field containing a 
 																//challenge applicable to the requested resource"
 		return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-	}
-	
-	@ExceptionHandler(NoSuchMethodError.class)
-	public final ResponseEntity<EmployeeResponseBodySuperclass> handleMissingPages(){
-		EmployeeResponseBodySuperclass response = new EmployeeResponseBodySuperclass();
-		response.setStatusCode(HttpStatus.NOT_FOUND.value());
-		response.setStatusName(HttpStatus.NOT_FOUND.name());
-		response.setStatusDescription(EmployeeMessageManager.getVal("errorPageDoesNotExist"));
-		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-	}
-	
-	@ExceptionHandler(EmployeeServerErrorException.class)
-	public final ResponseEntity<EmployeeResponseBodySuperclass> handleServerErrors(Exception ex){
-		EmployeeResponseBodySuperclass response = new EmployeeResponseBodySuperclass();
-		response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		response.setStatusName(HttpStatus.INTERNAL_SERVER_ERROR.name());
-		response.setStatusDescription(ex.getMessage());
-		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

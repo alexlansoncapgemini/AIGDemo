@@ -101,6 +101,14 @@ public class EmployeeSpecificReadTester {
 				testemployeeSpecificRead.getEmployee_id()).get(0);
 		
 		assertNotNull(testemployeeSpecificRead);
+		
+		//testing conversions
+		String employeeString = testemployeeSpecificRead.toString();
+		
+		testemployeeSpecificRead = EmployeeBeanModifier.convertFromDetails(Optional.ofNullable(
+				EmployeeBeanModifier.employeeStringParser(employeeString)));
+		
+		assertNotNull(testemployeeSpecificRead);
 	}
 	
 	@Test

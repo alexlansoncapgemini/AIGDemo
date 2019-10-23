@@ -102,38 +102,8 @@ public class EmployeeBeanModifier {
 					break;
 			}
 		}
-	return ordersort;
-	}
-	
-	//same as above, but doesn't expect a employee_id
-	//making this a separate method was less of a pain than refactoring the
-	//above method to be able to handle a case without a employee_id expectation
-	protected List<Keyval> indexerNoId(List<Keyval> ordersort){
-		for(Keyval k : ordersort) {
-			String labl = k.getVal();
-			switch(labl) {	//constant string expressions needed here
-				case "first_name":
-					k.setIndx(0);
-					break;
-				case "last_name":
-					k.setIndx(1);
-					break;
-				case "pass_word":
-					k.setIndx(2);
-					break;
-				case "age":
-					k.setIndx(3);
-					break;
-				case "department":
-					k.setIndx(4);
-					break;
-				default:
-					break;
-			}
-		}
-	return ordersort;
-	}
-		
+		return ordersort;
+	}	
 	
 	//parses a string containing employee data into a EmployeeDetails object
 	public EmployeeDetails employeeStringParser(String input) {
@@ -179,16 +149,46 @@ public class EmployeeBeanModifier {
 		Collections.sort(ordersort); //finally sorts the list into the read order below
 		
 		return EmployeeDetails.builder()
-				.first_name(ordersort.get(0).getVal())
-				.last_name(ordersort.get(1).getVal())
-				.pass_word(ordersort.get(2).getVal())
-				.age(Integer.parseInt(ordersort.get(3).getVal()))
-				.department(ordersort.get(4).getVal()).build();
+				.employee_id(Integer.parseInt(ordersort.get(0).getVal()))
+				.first_name(ordersort.get(1).getVal())
+				.last_name(ordersort.get(2).getVal())
+				.pass_word(ordersort.get(3).getVal())
+				.age(Integer.parseInt(ordersort.get(4).getVal()))
+				.department(ordersort.get(5).getVal()).build();
+	}
+
+	//same as indexer, but doesn't expect a employee_id
+	//making this a separate method was less of a pain than refactoring the
+	//indexer method to be able to handle a case without a employee_id expectation
+	protected List<Keyval> indexerNoId(List<Keyval> ordersort){
+		for(Keyval k : ordersort) {
+			String labl = k.getVal();
+			switch(labl) {	//constant string expressions needed here
+				case "first_name":
+					k.setIndx(0);
+					break;
+				case "last_name":
+					k.setIndx(1);
+					break;
+				case "pass_word":
+					k.setIndx(2);
+					break;
+				case "age":
+					k.setIndx(3);
+					break;
+				case "department":
+					k.setIndx(4);
+					break;
+				default:
+					break;
+			}
+		}
+		return ordersort;
 	}
 	
-	//same as above, but doesn't expect a employee_id
+	//same as employeeStringParser, but doesn't expect a employee_id
 	//making this a separate method was less of a pain than refactoring the
-	//above method to be able to handle a case without a employee_id expectation
+	//employeeStringParser method to be able to handle a case without a employee_id expectation
 	public EmployeeDetails employeeStringParserNoId(String input) {
 		//values: first_name, last_name, pass_word, age, department
 		//order of these values in the database is not guaranteed
@@ -217,7 +217,7 @@ public class EmployeeBeanModifier {
 			valholder.add(v.substring(splitpoint+1));
 		}
 		
-		ordersort = indexer(ordersort); //sets the indices to the order 
+		ordersort = indexerNoId(ordersort); //sets the indices to the order 
 										//that the values will be read in
 		
 		//stores the values in the order they appear in

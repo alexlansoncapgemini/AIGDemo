@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.UnprocessableEntity;
 
 import com.openpojo.reflection.PojoClass;
@@ -32,6 +33,7 @@ import demo.responses.EmployeeResponseBodySuperclass;
 import demo.service.EmployeeServiceImplementation;
 import demo.util.EmployeeBeanModifier;
 import demo.util.EmployeeMessageManager;
+import demo.util.EmployeeValidator;
 
 public class EmployeeInsertionFailTester {
 	@Mock
@@ -71,7 +73,7 @@ public class EmployeeInsertionFailTester {
 	}
 	
 	@Test(expected = EmployeeInvalidRequestParameterException.class)
-	public void validateServiceInsertFail() 
+	public void validateServiceInsertFailInvalid() 
 			throws EmployeeRequestOnNullObjectException, 
 			EmployeeInvalidRequestParameterException, 
 			EmployeeDuplicateEntryExistsException {
@@ -81,8 +83,25 @@ public class EmployeeInsertionFailTester {
 		testemployeeServiceInsert = serviceImpl.newEmployee(testemployeeServiceInsert);
 	}
 	
+	@Test(expected = EmployeeDuplicateEntryExistsException.class)
+	public void validateServiceInsertFailDuplicate() 
+			throws EmployeeRequestOnNullObjectException, 
+			EmployeeInvalidRequestParameterException, 
+			EmployeeDuplicateEntryExistsException {
+		Employee testemployeeServiceInsert = employeelist.get(1);
+		
+		if(EmployeeValidator.validateIsEmployeeFirstNameInDatabase(
+				databaseImpl, testemployeeServiceInsert.getFirst_name())) {
+			serviceImpl.newEmployee(testemployeeServiceInsert);
+		}
+		else {
+			serviceImpl.newEmployee(testemployeeServiceInsert);
+			serviceImpl.newEmployee(testemployeeServiceInsert);
+		}
+	}
+	
 	@Test(expected = UnprocessableEntity.class)
-	public void ValidateControllerInsertFail() {
+	public void ValidateControllerInsertFailInvalid() {
 		EmployeeDetails testemployeeBadControllerInsert = 
 				EmployeeBeanModifier.convertToDetails(Optional.ofNullable(employeelist.get(2)));
 		
@@ -93,8 +112,22 @@ public class EmployeeInsertionFailTester {
 				testemployeeBadControllerInsert, EmployeeResponseBodySuperclass.class);
 	}
 	
+	@Test(expected = BadRequest.class)
+	public void ValidateControllerInsertFailDuplicate() {
+		EmployeeDetails testemployeeBadControllerInsert = 
+				EmployeeBeanModifier.convertToDetails(Optional.ofNullable(employeelist.get(2)));
+		
+		restTemplate.postForObject(EmployeeMessageManager.getVal("baseUrl") + 
+				EmployeeMessageManager.getVal("createMapping"), 
+				testemployeeBadControllerInsert, EmployeeResponseBodySuperclass.class);
+		
+		restTemplate.postForObject(EmployeeMessageManager.getVal("baseUrl") + 
+				EmployeeMessageManager.getVal("createMapping"), 
+				testemployeeBadControllerInsert, EmployeeResponseBodySuperclass.class);
+	}
+	
 	@Test(expected = EmployeeInvalidRequestParameterException.class)
-	public void ValidateControllerInsertMethodFail() 
+	public void ValidateControllerInsertMethodFailInvalid() 
 			throws EmployeeDuplicateEntryExistsException, 
 			EmployeeRequestOnNullObjectException, 
 			EmployeeInvalidRequestParameterException {
@@ -103,6 +136,18 @@ public class EmployeeInsertionFailTester {
 		
 		testemployeeControllerInsertMethod.setAge(10);
 		
+		restController.addNewEmployee(testemployeeControllerInsertMethod);
+	}
+	
+	@Test(expected = EmployeeDuplicateEntryExistsException.class)
+	public void ValidateControllerInsertMethodFailDuplicate() 
+			throws EmployeeDuplicateEntryExistsException, 
+			EmployeeRequestOnNullObjectException, 
+			EmployeeInvalidRequestParameterException {
+		EmployeeDetails testemployeeControllerInsertMethod = 
+				EmployeeBeanModifier.convertToDetails(Optional.ofNullable(employeelist.get(3)));
+		
+		restController.addNewEmployee(testemployeeControllerInsertMethod);
 		restController.addNewEmployee(testemployeeControllerInsertMethod);
 	}
 }
